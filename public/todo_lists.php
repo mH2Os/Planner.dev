@@ -71,7 +71,7 @@
 
 <ul>
 <? foreach ($items as $key => $chores): ?>
-        <li> <a href='?remove=<?= $key; ?>'>Complete</a> <?= $chores; ?> </li>
+        <li> <a href='?remove=<?= $key; ?>'>Complete</a> <?= htmlspecialchars(strip_tags($chores)); ?> </li>
 <? endforeach; ?>
 </ul>
 
