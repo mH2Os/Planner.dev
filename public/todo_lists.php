@@ -1,64 +1,58 @@
 <?php 
 
-    define('FILENAME', './lists.txt');
+define('FILENAME', './lists.txt');
 
-    function open_list($filename = FILENAME)
-    {
-        $items = array();
+function open_list($filename = FILENAME)
+{
+    $items = array();
 
-        if(is_readable($filename) && filesize($filename) > 0) {
-            $handle = fopen($filename, "r");
-            $contents = trim(fread($handle, filesize($filename)));
-            $items = explode("\n", $contents);
+    if(is_readable($filename) && filesize($filename) > 0) {
+        $handle = fopen($filename, "r");
+        $contents = trim(fread($handle, filesize($filename)));
+        $items = explode("\n", $contents);
 
-            fclose($handle);
-        }
-
-        return $items;
-    }
-
-    function save_list($array, $filename = FILENAME) 
-    {
-        $handle = fopen($filename, 'w');
-        $save = implode("\n", $array);
-        fwrite($handle, $save);
         fclose($handle);
     }
 
-    $items = open_list();
+    return $items;
+}
 
-    if (isset($_POST['new_item'])) {
-        $items[] = $_POST['new_item'];
-        save_list($items);
-    }
+function save_list($array, $filename = FILENAME) 
+{
+    $handle = fopen($filename, 'w');
+    $save = implode("\n", $array);
+    fwrite($handle, $save);
+    fclose($handle);
+}
 
-    if (isset($_GET['remove'])) {
-        unset($items[$_GET['remove']]);
-        save_list($items);
-        $items = array_values($items);
-    }
+$items = open_list();
 
-    if (isset($_FILES['upload']) && $_FILES['upload']['error'] == UPLOAD_ERR_OK) {
-        // var_dump($_FILES['upload']);
+if (isset($_POST['new_item'])) {
+    $items[] = $_POST['new_item'];
+    save_list($items);
+}
 
-        $upload = $_FILES['upload'];
+if (isset($_GET['remove'])) {
+    unset($items[$_GET['remove']]);
+    save_list($items);
+    $items = array_values($items);
+}
 
-        $uploadPath = '/vagrant/sites/planner.dev/public/uploads/';
-        $uploadBasename = basename($upload['name']);
+if (isset($_FILES['upload']) && $_FILES['upload']['error'] == UPLOAD_ERR_OK) {
 
-        $newFilename = $uploadPath . $uploadBasename;
+    $upload = $_FILES['upload'];
 
-        move_uploaded_file($upload['tmp_name'], $newFilename);
+    $uploadPath = '/vagrant/sites/planner.dev/public/uploads/';
+    $uploadBasename = basename($upload['name']);
 
-        // open the new uploaded file & read it into an array
-        $newItems = open_list($newFilename);
+    $newFilename = $uploadPath . $uploadBasename;
 
-        // merge that array into our global $items variable
-        $items = array_merge($newItems, $items);
-
-        // save the newly merged items
-        save_list($items);
-    }
+    move_uploaded_file($upload['tmp_name'], $newFilename);
+    
+    $newItems = open_list($newFilename);
+    $items = array_merge($newItems, $items);
+   save_list($items);
+}
 
 ?>
 
