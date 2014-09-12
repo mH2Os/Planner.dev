@@ -2,7 +2,7 @@
 
 define('FILENAME', './address_book.csv');
 
-include('address_data_store.php');
+require_once('address_data_store.php');
 
 $ads = new AddressDataStore();
 $address_book = $ads->open_address_book();
