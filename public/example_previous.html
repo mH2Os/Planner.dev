@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>Paging Next Previous Buttons</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+<body>
+
+	<?php
+
+	include 'config.php';
+
+	include 'openmytest.php';
+
+	// rows per page
+	$rowsPerPage = 3;
+
+	// if $_GET
+	if(isset($_GET['page'])) {
+		$pageNum= $_GET['page'];
+	} else { 
+		$pageNum = 1;
+	}
+
+	// preceding rows
+	$previousRows =($pageNum - 1) * $rowsPerPage;
+
+	// the first, optional value of LIMIT is the start position
+
+	//the next required value is the number of rows to retrieve
+
+	$query = "SELECT Users.ID, Name,Pass,Perm,EMail,Date,UID
+
+	FROM Users,Emails WHERE Users.ID=UID LIMIT $previousRows, $rowsPerPage";
+
+	$result = mysql_query($query) or die('Error couldn\'t get the data').mysql_error();
+
+	echo "<table border=1>\n";
+
+	echo "<tr><th>ID</th><th>Name</th><th>Password</th><th>Perm</th><th>Email</th>
+
+	<th>Date</th></tr>";
+
+	// print the results
+
+	while(list($id,$name,$pass,$perm,$email,$date) = mysql_fetch_array($result)) {
+		echo "<tr><td>$id</td><td>$name</td><td>$pass</td><td>$perm</td><td>$email</td>
+		<td>$date</td></tr>";
+	}
+
+	echo '</table>';
+
+	// Find the number of rows in the query
+
+	$query = "SELECT COUNT(Name) AS numrows FROM Users";
+
+	$result = mysql_query($query) or die('Error, couldn\'t get count title=\"$page\"').mysql_error();
+
+	//use an associative array
+
+	$row = mysql_fetch_assoc($result);
+
+	$numrows = $row['numrows'];
+
+	// find the last page number
+
+	$lastPage = ceil($numrows/$rowsPerPage);
+
+	//we use ceil which rounds up the result, because if we have 4.2 as an answer, we'd need 5 pages.
+
+	$phpself = $_SERVER['PHP_SELF'];
+
+	//if the current page is greater than 1, that is, it isn't the first page
+
+	//then we print first and previous links
+
+	if ($pageNum > 1) {
+		$page = $pageNum - 1;
+		$prev = " <a href=\"$phpself?page=$page\" title=\"Page $page\">[Back]</a> ";
+		$first = " <a href=\"$phpself?page=1\" title=\"Page 1\">[First Page]</a> ";
+	} else
+		//otherwise we do not print a link, because the current page is
+		//the first page, and there are no previous pages
+	{ 
+		$prev = ' [Back] ';
+		$first = ' [First Page] ';
+	}
+
+	// We print the links for the next and last page only if the current page
+	//isn't the last page
+	if ($pageNum < $lastPage) {
+		$page = $pageNum + 1;
+		$next = " <a href=\"$phpself?page=$page\" title=\"Page $page\">[Next]</a> ";
+		$last = " <a href=\"$phpself?page=$lastPage\" title=\"Page $lastPage\">[Last Page]</a> ";
+	}
+	//the current page is the last page, so we don't print links for
+	//the last and next pages, there is of course no next page.
+	  else {
+		$next = ' [Next] ';
+		$last = ' [Last Page] ';
+	}
+
+	//We print the links depending on our selections above
+	echo $first . $prev . " Showing page <bold>$pageNum</bold> of
+
+	<bold>$lastPage</bold> pages " . $next . $last;
+
+	include 'closedb.php';
+
+	?>
+
+</body>
+
+</html>

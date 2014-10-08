@@ -1,0 +1,43 @@
+<?php
+
+class AdManager {
+
+    func remove_ad 
+    {
+        if (isset($_GET['remove'])) {
+            unset($ad_data[$_GET['remove']]);
+            $ads->save_ad($ad_data);
+            $ad_data = array_values($ad_data);
+        }
+    }
+    
+    func update_ad 
+    {
+        $filename = 'data/ads.csv';
+
+        $handle = fopen($filename, 'r');
+
+        $ad_data = [];
+
+        while(!feof($handle)) {
+          $ad_data[] = fgetcsv($handle);
+        }
+
+        fclose($handle);
+    }
+    
+}
+
+
+
+// DATE info (javascript)
+    // {
+    //     document.getElementById('posts').innerHTML = html;
+
+    //     var html_single = '';
+
+    //     var postDate = moment(postDate.date, "YYYYMMDD").fromNow();
+    //     html_single += '<small>' + postDate + '</small>';
+    // }
+
+?>

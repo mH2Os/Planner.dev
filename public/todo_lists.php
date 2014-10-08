@@ -2,39 +2,32 @@
 
 define('FILENAME', './lists.txt');
 
-function open_list($filename = FILENAME)
-{
-    $items = array();
+require_once('../inc/filestore.php');
 
-    if(is_readable($filename) && filesize($filename) > 0) {
-        $handle = fopen($filename, "r");
-        $contents = trim(fread($handle, filesize($filename)));
-        $items = explode("\n", $contents);
+$file = new Filestore(FILENAME);
 
-        fclose($handle);
-    }
-
-    return $items;
-}
-
-function save_list($array, $filename = FILENAME) 
-{
-    $handle = fopen($filename, 'w');
-    $save = implode("\n", $array);
-    fwrite($handle, $save);
-    fclose($handle);
-}
-
-$items = open_list();
+$items = $file->read();
 
 if (isset($_POST['new_item'])) {
-    $items[] = $_POST['new_item'];
-    save_list($items);
-}
+    try {
+        if(strlen($_POST['new_item']) == 0){
+            throw new Exception('You didn\'t add any items!');
+        } elseif(strlen($_POST['new_item']) > 240){
+            throw new Exception('Your item cant be longer then 240 characters!');
+        }
+        $items[] = $_POST['new_item'];
+        $file->write($items);
+
+    } catch (Exception $e) {
+        $getMessage = $e->getMessage();
+    }
+
+    
+} 
 
 if (isset($_GET['remove'])) {
     unset($items[$_GET['remove']]);
-    save_list($items);
+    $file->write($items);
     $items = array_values($items);
 }
 
@@ -49,9 +42,9 @@ if (isset($_FILES['upload']) && $_FILES['upload']['error'] == UPLOAD_ERR_OK) {
 
     move_uploaded_file($upload['tmp_name'], $newFilename);
     
-    $newItems = open_list($newFilename);
+    $newItems = $file->read($newFilename);
     $items = array_merge($newItems, $items);
-   save_list($items);
+   $file->write($items);
 }
 
 ?>
@@ -71,13 +64,18 @@ if (isset($_FILES['upload']) && $_FILES['upload']['error'] == UPLOAD_ERR_OK) {
 
 
 <h2>New Item</h2>
-<form method="post" action="todo_lists.php">
-    <div class="form-group">
-        <input type="text" placeholder="new item" name="new_item" id="new-item">
-    </div>
-    <div class="form-group">
-        <button type="submit">Add Item</button>
-    </div> 
+<form method="post" action="todo_lists.php">  
+    <?php 
+    if(isset($_POST['new_item'])){
+        echo $getMessage;    
+    }
+    ?>
+        <div class="form-group">
+            <input type="text" placeholder="new item" name="new_item" id="new-item">
+        </div>
+        <div class="form-group">
+            <button type="submit">Add Item</button>
+        </div> 
 </form>
 
 
